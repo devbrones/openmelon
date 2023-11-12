@@ -84,13 +84,13 @@ public class DeviceHandle {
     
     final ScheduledExecutorService a = Executors.newSingleThreadScheduledExecutor();
     
-    private final UUID d = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    private final UUID d = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"); // Descriptor
     
-    private final UUID e = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    private final UUID e = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e"); // Service UART nRF
     
-    private final UUID f = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    private final UUID f = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e"); // Characteristic TX
     
-    private final UUID g = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    private final UUID g = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e"); // Characteristic RX
     
     private final y h = new y();
     
@@ -178,11 +178,11 @@ public class DeviceHandle {
       return str;
     }
     
-    public void a(String param1String) {
+    public void a(String param1String) { //SENDER?
       synchronized (this) {
         this.l = param1String;
         this.n = true;
-        notifyAll();
+        notifyAll(); // wake all listener threads
         if (param1String != null)
           Log.i(this.i, "Device name: " + param1String); 
       } 
@@ -351,13 +351,13 @@ public class DeviceHandle {
       this.p = DeviceHandle.DeviceState.DISCONNECTED;
     }
     
-    private boolean b(String param1String) { // send command to device
+    private boolean b(String param1String) { // send command to device CONVERTER
       if (this.m == null || this.p == DeviceHandle.DeviceState.DISCONNECTED)
         return false; 
       boolean bool = false;
       try {
         byte[] arrayOfByte = param1String.getBytes("UTF-8");
-        bool = a(arrayOfByte);
+        bool = a(arrayOfByte); // send command to device
       } catch (UnsupportedEncodingException unsupportedEncodingException) {}
       return bool;
     }
@@ -366,7 +366,7 @@ public class DeviceHandle {
       return (this.m == null) ? false : b("DR0401");
     }
     
-    private boolean t() {
+    private boolean t() { // RECV?
       if (this.m == null)
         return false; 
       if (this.p == DeviceHandle.DeviceState.CONNECTING)
@@ -391,7 +391,7 @@ public class DeviceHandle {
       return this.m.writeDescriptor(bluetoothGattDescriptor);
     }
     
-    private boolean a(byte[] param1ArrayOfbyte) {
+    private boolean a(byte[] param1ArrayOfbyte) { // send command to device
       if (this.m == null)
         return false; 
       BluetoothGattService bluetoothGattService = this.m.getService(this.e);

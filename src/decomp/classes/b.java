@@ -63,7 +63,7 @@ class b extends BluetoothGattCallback {
       arrayOfShort[b1] = (short)(arrayOfByte[b1] & 0xFF); 
     if (arrayOfByte != null)
       if (arrayOfByte.length == 20 && arrayOfByte[0] == -96) {
-        DeviceHandle.Peripheral.k(this.a).a(arrayOfShort);
+        DeviceHandle.Peripheral.h(this.a).a(arrayOfShort); // DeviceHandle.Peripheral.k(this.a).a(arrayOfShort);
         S3File.getInstance();
         if (S3File.isInitialized())
           S3File.getInstance().writeBytesToS3File(arrayOfByte); 
