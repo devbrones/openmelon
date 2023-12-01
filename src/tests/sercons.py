@@ -1,6 +1,9 @@
 import asyncio
 from bleak import BleakScanner, BleakClient
-import parser as p
+import matplotlib.pyplot as plt
+import packetparser as p
+import csv
+from threading import Thread
 
 async def subscribe_nordic_uart(address, loop):
     async with BleakClient(address, loop=loop) as client:
@@ -8,59 +11,12 @@ async def subscribe_nordic_uart(address, loop):
             if not client.is_connected:
                 await client.connect()
 
-            
-            """
-            private void h() {
-                  String str = this.q;
-                  Long long_ = Long.decode("0x" + str.toLowerCase());
-                  int i = long_.intValue();
-                  float f1 = 3.6F;
-                  float f2 = 3.956F;
-                  float f3 = 4.7F;
-                  float f4 = i * 2.0F / 100.0F;
-                  float f5 = (f4 - f1) / (f2 - f1);
-                  float f6 = Math.min(1.0F, Math.max(0.0F, f5));
-                  this.v = Float.valueOf(f4);
-                  this.u = Float.valueOf(f6);
-                }
-            """
 
-            def decode_packet(packet: str) -> (float, float):
-                if len(packet) >= 12:  # Ensure the packet has at least 12 bytes for further processing
-                    try:
-                        # Process the packet based on its structure
-                        byte_data = bytes.fromhex(packet)
-                        if len(byte_data) >= 6:
-                            samples = [byte_data[i:i+3] for i in range(0, len(byte_data), 3)]
-
-                            values = []
-                            for sample in samples:
-                                if len(sample) == 3:
-                                    val = (sample[0] << 16) | (sample[1] << 8) | sample[2]
-                                    # Apply the conversion to float
-                                    f_val = (val * 0.4) / ((1 << 23) - 1) * 1000000.0
-                                    values.append(f_val)
-
-                            if len(values) >= 2:
-                                return tuple(values[:2])  # Returning the first two values as floats
-
-                    except Exception as e:
-                        print(f"Error decoding packet: {e}")
-
-                return 0.0, 0.0  # Return default values in case of errors
-
-
-
-            # Set up notification handler for the Nordic UART RX characteristic
-            def notification_handler(sender, data):
-                hex_data = " ".join(f"{byte:02x}" for byte in data)
-                print(f"{data}")
-
-                # Decode received data into floating-point values
+            async def notification_handler(sender, data):
                 decoded_values = p.parseData(data)
-                #print("Decoded values:", decoded_values)
+                await save_to_csv(decoded_values)
+                print(f"Received: {decoded_values}")
 
-            # Find the Nordic UART service and its characteristics
             services = await client.get_services()
             uart_service = next(
                 (service for service in services if service.uuid == "6e400001-b5a3-f393-e0a9-e50e24dcca9e"),
@@ -81,14 +37,14 @@ async def subscribe_nordic_uart(address, loop):
                     print("Connected to Nordic UART Service.")
                     print("Type 'exit' to quit.")
 
-                    # Subscribe to notifications for the Nordic UART RX characteristic
                     await client.start_notify(rx_characteristic, notification_handler)
 
-                    # Run the sending commands and receiving notifications concurrently
-                    await asyncio.gather(
-                        send_commands(client, tx_characteristic),
-                        receive_notifications()
-                    )
+                    while True:
+                        user_input = input("Enter a command: ")
+                        if user_input.lower() == "exit":
+                            break
+                        else:
+                            await client.write_gatt_char(tx_characteristic, user_input.encode())
 
                 else:
                     print("Nordic UART characteristics not found.")
@@ -98,17 +54,19 @@ async def subscribe_nordic_uart(address, loop):
         except Exception as e:
             print(f"Failed to subscribe to Nordic UART: {e}")
 
-async def send_commands(client, tx_characteristic):
-    while True:
-        user_input = input("Enter a command: ")
-        if user_input.lower() == "exit":
-            break
-        else:
-            await client.write_gatt_char(tx_characteristic, user_input.encode())
+async def save_to_csv(data):
+    with open('received_data.csv', 'a', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        # Reshape the data
+        result = [
+            [data[i][j], data[i][j + 1], data[i][j], data[i][j + 1]]
+            for i in range(len(data))
+            for j in range(0, len(data[i]), 2)
+            if j + 1 < len(data[i])
+        ]
+        for row in result:
+            csv_writer.writerow(row)
 
-async def receive_notifications():
-    while True:
-        await asyncio.sleep(1)  # Adjust this time interval if needed
 
 async def scan_and_subscribe_nordic_uart():
     scanner = BleakScanner()
@@ -125,5 +83,13 @@ async def scan_and_subscribe_nordic_uart():
                 print(f"Failed to subscribe to Nordic UART for {device.name}: {e}")
             loop.close()
 
+
+async def main():
+    tasks = [
+        scan_and_subscribe_nordic_uart(),
+
+    ]
+    await asyncio.gather(*tasks)
+
 loop = asyncio.get_event_loop()
-loop.run_until_complete(scan_and_subscribe_nordic_uart())
+loop.run_until_complete(main())

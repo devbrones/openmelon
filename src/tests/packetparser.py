@@ -37,37 +37,22 @@ class SignalAnalyzer:
     def multiplier(self, paramArrayOfint):
         return [x * self.c for x in paramArrayOfint]
 
-# Modify your onCharacteristicChanged method to utilize the updated 'y' class
-def onCharacteristicChanged(paramBluetoothGatt, paramBluetoothGattCharacteristic):
-    arrayOfByte = paramBluetoothGattCharacteristic.getValue()
-    arrayOfShort = [b & 0xFF for b in arrayOfByte]
-    
-    if arrayOfByte and len(arrayOfByte) == 20 and arrayOfByte[0] == -96:
-        peripheral = y()
-        peripheral.a(arrayOfShort)
-        writeBytesToS3File(arrayOfByte)  # Simulating the write function
-    else:
-        try:
-            str = arrayOfByte.decode("utf-8")
-            if len(str) == 4:
-                a(this.a, str[0:len(str) - 2])
-                h(this.a)
-        except Exception as e:
-            pass
-
-
 def parseData(rxbytes: bytearray):
     if not rxbytes:
         return
     else:
-        test = [b & 0xFF for b in rxbytes]
-
-        print(test[0])
-        if len(rxbytes) == 20 and rxbytes[0] == -96:
-            peripheral = y()
-            peripheral.convertSamples(rxbytes)
+        rxbytes = [b & 0xff for b in rxbytes]
+        if len(rxbytes) == 20: #  and rxbytes[0] == -96
+            peripheral = SignalAnalyzer()
+            return peripheral.convertSamples(rxbytes)
         else:
-            print(f"Error: Invalid data received; {rxbytes}")
+            try:
+                str = rxbytes.decode("utf-8")
+                if len(str) == 4:
+                    return str[0:len(str) - 2]
+            except Exception as e:
+                pass
+
             
             
 
