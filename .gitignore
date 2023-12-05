@@ -1,0 +1,3 @@
+# ignore outputs folder
+src/tests/outputs/*
+

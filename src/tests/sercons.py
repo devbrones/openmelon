@@ -13,9 +13,10 @@ async def subscribe_nordic_uart(address, loop):
 
 
             async def notification_handler(sender, data):
-                decoded_values = p.parseData(data)
-                await save_to_csv(decoded_values)
-                print(f"Received: {decoded_values}")
+                #decoded_values = p.parseData(data)
+                #await save_to_csv(decoded_values)
+                #print(f"Received: {decoded_values}")
+                await save_raw_hex(data)
 
             services = await client.get_services()
             uart_service = next(
@@ -44,7 +45,11 @@ async def subscribe_nordic_uart(address, loop):
                         if user_input.lower() == "exit":
                             break
                         else:
-                            await client.write_gatt_char(tx_characteristic, user_input.encode())
+                            if user_input.lower() == "s01":
+                                await client.write_gatt_char(tx_characteristic, user_input.encode())
+                                await asyncio.sleep(100)
+                                await client.write_gatt_char(tx_characteristic, ("S00").encode())
+                            #await client.write_gatt_char(tx_characteristic, user_input.encode())
 
                 else:
                     print("Nordic UART characteristics not found.")
@@ -66,6 +71,11 @@ async def save_to_csv(data):
         ]
         for row in result:
             csv_writer.writerow(row)
+
+async def save_raw_hex(data):
+    with open('received_data.hex', 'a', newline='') as hexfile:
+        # write the data as hex string followed by newline
+        hexfile.write(str(data.hex()) + '\n')
 
 
 async def scan_and_subscribe_nordic_uart():

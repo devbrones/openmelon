@@ -13,7 +13,11 @@ protected void conversionMethod(short[] rawSamples) {
         int val1 = tempSample[0] & 0xFF; // convert to unsigned int
         int val2 = tempSample[1] & 0xFF; // 
         int val3 = tempSample[2] & 0xFF; // 
-        int sampleValue = (val1 << 16) + (val2 << 8) + val3; // combine the 3 bytes into one int
+        int sampleValue = (val1 << 16) + (val2 << 8) + val3;  // combine the 3 bytes into one int
+                                                              // It will become a 24 bit integer, BUT IT IS NOT!
+                                                              // T represents timestamp part 1 and U represents timestamp part 2 and S represents sample value
+                                                              // TTTTTTTTUUUUUUUUSSSSSSSS
+                                                              // The sample is hence only located in the last 8 bits!
 
 
         if (i == 0) {    // write to the right sample array

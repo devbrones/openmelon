@@ -397,3 +397,75 @@ private float[] multiplier(int[] sample) {
 }
 ```
 
+<hr>
+
+## Bit-shift mysteries and odd binary logic
+
+DEC 5 2023
+
+
+Finally some good fucking progress!
+
+Sample rate has been 100% confirmed. Did a recording of 100 seconds, which gave 8349 packets, so 83.49 packets/sec. 83.49 multiplied by the amounts of samples (3 samples) yields a sample rate of ≈ 250 samples/second or 250 Hz rate!
+
+
+![i cant annotate this image im sorry](/docs/resources/yipee.png)
+
+Took a closer look at the raw hex data and noticed something very silly. The first 2 bytes (marked yellow) are of course omitted, as we can see in this code (un-reverese-engineered ```y.java```)
+```java
+protected void a(short[] paramArrayOfshort) {
+    System.arraycopy(paramArrayOfshort, 2, this.e, 0, 18);
+```
+then we can see quite easily that the data is segmented into six parts (3 samples per 2 channels, each sample is marked as a group of "orange,red,green"). where the two first bytes (orange and red) are simply counting up from some initial value to ```0xffff``` and then rolls over. The values (or value rather since it really is a 2 byte value) is incremented every 28-29 values, so 3 times per second, is my best guess. This is most likely done to keep track of the time, since the sample rate may fluctuate a bit. The green values are the actual samples themselves!
+
+In the 
+```java 
+conversionMethod()
+``` 
+function shown above:
+
+```java
+int sampleValue = (val1 << 16) + (val2 << 8) + val3;  // combine the 3 bytes into one int
+// It will become a 24 bit integer, BUT IT IS NOT!
+// T represents timestamp part 1 and U represents timestamp part 2 and S represents sample value
+// TTTTTTTTUUUUUUUUSSSSSSSS
+// The sample is hence only located in the last 8 bits!
+```
+
+Each 3 byte block is parsed as following:
+- create new int to store the data
+- sign the bytes as unsigned ints
+- add the first byte (Timestamp 1) shifted 16 bits to the left  | ```TTTTTTTT0000000000000000```
+- add the second byte (Timestamp 2) shifted 8 bits to the left  | ```TTTTTTTTUUUUUUUU00000000```
+- add the sample byte (Sample) to the int                       | ```TTTTTTTTUUUUUUUUSSSSSSSS```
+
+The sample is hence only located in the last 8 bits! So what we really want to do before multiplying the sample with the 
+```java
+multiplier()
+```
+method is to just keep the last 8 bits of the int, i wonder if this is what the original code does?
+
+```java
+private float[] multiplier(int[] sample) {
+  float[] finalSample = new float[sample.length]; // set up the float array
+  for (byte i = 0; i < sample.length; i++) { // iterate through the sample array
+    finalSample[i] = sample[i] * 0.4F / ((float)Math.pow(2.0D, 23.0D) - 1.0F) * 1000000.0F; // multiply by 0.4 / 2^23 - 1 * 1000000, why may you ask? I have no idea.
+  } 
+  return finalSample;
+}
+```
+
+lets take a closer look at the fourth row of code:
+```java 
+finalSample[i] = sample[i] * 0.4F / ((float)Math.pow(2.0D, 23.0D) - 1.0F) * 1000000.0F;
+```
+it takes the sample int (remember, 24 bit representation of a 8 bit value, where the 16 higher bits is just a incrementor) and does the following:
+
+$$sampleFloat=\frac{sampleInt \cdot 0.4}{2^{23}-1}\cdot 1\mathrm{e}{6}$$
+
+Very interesting, i have absolutely no clue as to what this could do.
+
+I think im going to just bitwise and the value by 0xff and see what happens.
+
+
+
