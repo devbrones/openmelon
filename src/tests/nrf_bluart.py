@@ -5,7 +5,7 @@ import threading
 import time
 from queue import Queue
 from packet_parser import conversion_method as convert
-from melon import Melon
+from constants import Melon
 
 # BLE device characteristics and commands
 INIT_COMMAND = Melon.INITCMD

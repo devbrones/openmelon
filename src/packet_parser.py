@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 import datetime
 
-def conversion_method(byte_string):
+def parse(byte_string):
     """
     The function takes a byte string as input, converts it to raw samples, extracts specific values from
     the samples, and multiplies them to obtain final samples.
     
     :param byte_string: The `byte_string` parameter is a string representing a sequence of hexadecimal
     values
-    :return: The function `conversion_method` returns three values: `final_sample1`, `final_sample2`,
+    :return: The function `parse` returns three values: `final_sample1`, `final_sample2`,
     and `final_sample3`.
     """
 

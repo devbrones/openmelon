@@ -11,17 +11,32 @@ inlet = StreamInlet(streams[0])
 # Select channels of interest (assuming Fp1 and Fp2)
 channels = ['Fp1', 'Fp2']
 
-# Create a figure and axis for plotting
+# Create a figure and axis for plotting wavelets
 fig, axs = plt.subplots(5)
 plt.ion()  # Turn on interactive mode for real-time plotting
 fig.suptitle('Channel 1 and Channel 2 (Raw and Corrected)')
 fig.show()
 
-# Buffer length for displaying the last 10 seconds of data (assuming 250 samples per second)
-buffer_length = 250 * 10
+# create a figure and axis for plotting the fourier transform (for both channels)
+fig2, axs2 = plt.subplots(1)
+plt.ion()  # Turn on interactive mode for real-time plotting
+fig2.suptitle('Channel 1 and Channel 2 (Fourier Transform)')
+fig2.show()
+
+# Buffer length for displaying the last 4 seconds of data (assuming 250 samples per second)
+buffer_length = 250 * 4 
 raw_buffer = []
 
 timestamps_buffer = []  # Buffer to store timestamps
+
+freq_ranges = {
+    "delta": [0.5, 4], 
+    "theta": [4, 8], 
+    "alpha": [8, 12], 
+    "beta": [12, 30], 
+    "gamma": [30, 100]
+}
+
 
 # Infinite loop for real-time data processing and plotting
 while True:
@@ -55,30 +70,51 @@ while True:
 
         # Apply filters to the raw data
         raw.notch_filter(50)  # Notch filter at 50 Hz
+        raw.notch_filter(100)  # Notch filter at 100 Hz (second harmonic)
         raw.filter(0.5, 100)  # Bandpass filter from 0.5 to 100 Hz
-
-        # Extract different frequency bands for both channels
-        freq_ranges = {"delta": [0.5, 4], "theta": [4, 8], "alpha": [8, 12], "beta": [12, 30], "gamma": [30, 100]}
-        delta = raw.copy().filter(l_freq=freq_ranges["delta"][0], h_freq=freq_ranges["delta"][1])
-        theta = raw.copy().filter(l_freq=freq_ranges["theta"][0], h_freq=freq_ranges["theta"][1])
-        alpha = raw.copy().filter(l_freq=freq_ranges["alpha"][0], h_freq=freq_ranges["alpha"][1])
-        beta = raw.copy().filter(l_freq=freq_ranges["beta"][0], h_freq=freq_ranges["beta"][1])
-        gamma = raw.copy().filter(l_freq=freq_ranges["gamma"][0], h_freq=freq_ranges["gamma"][1])
 
         # Convert x-axis to seconds
         x = np.array(timestamps_buffer) / 250
 
+        # clear the axes
+        axs2.clear()
+        # plot the fourier transform for both channels
+        raw.compute_psd().plot(axes=axs2, show=False)
+        fig2.canvas.draw()
+        fig2.canvas.flush_events()
+
+        # Extract different frequency bands for both channels        
+        delta = raw.copy().filter(
+            l_freq=freq_ranges["delta"][0], 
+            h_freq=freq_ranges["delta"][1])
+        
+        theta = raw.copy().filter(
+            l_freq=freq_ranges["theta"][0], 
+            h_freq=freq_ranges["theta"][1])
+        
+        alpha = raw.copy().filter(
+            l_freq=freq_ranges["alpha"][0], 
+            h_freq=freq_ranges["alpha"][1])
+        
+        beta = raw.copy().filter(
+            l_freq=freq_ranges["beta"][0], 
+            h_freq=freq_ranges["beta"][1])
+        
+        gamma = raw.copy().filter(
+            l_freq=freq_ranges["gamma"][0], 
+            h_freq=freq_ranges["gamma"][1])
+
         # Plotting the different frequency bands for both channels
         axs[0].plot(x, delta.get_data()[0], color="red")
-        axs[0].plot(x, delta.get_data()[1], color="blue")
+        axs[0].plot(x, delta.get_data()[1], color="black")
         axs[1].plot(x, theta.get_data()[0], color="red")
-        axs[1].plot(x, theta.get_data()[1], color="blue")
+        axs[1].plot(x, theta.get_data()[1], color="black")
         axs[2].plot(x, alpha.get_data()[0], color="red")
-        axs[2].plot(x, alpha.get_data()[1], color="blue")
+        axs[2].plot(x, alpha.get_data()[1], color="black")
         axs[3].plot(x, beta.get_data()[0], color="red")
-        axs[3].plot(x, beta.get_data()[1], color="blue")
+        axs[3].plot(x, beta.get_data()[1], color="black")
         axs[4].plot(x, gamma.get_data()[0], color="red")
-        axs[4].plot(x, gamma.get_data()[1], color="blue")
+        axs[4].plot(x, gamma.get_data()[1], color="black")
 
         axs[0].set_title("Delta")
         axs[1].set_title("Theta")

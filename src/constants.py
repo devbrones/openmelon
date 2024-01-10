@@ -18,8 +18,3 @@ class Melon:
     lastSample: str     = ""
     connected: bool     = False                                    # Initialize the connected variable
     streaming: bool     = False                                    # Initialize the streaming variable
-
-    
-
-
-
