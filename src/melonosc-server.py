@@ -26,21 +26,14 @@ def handle_data(h, value):
 try:
     adapter.start()
     try:
-        
-        #adapter.reset()
-        
-        #adapter.disconnect()
-        
         device = adapter.connect(Melon.ADDRESS,
-                                 address_type=pygatt.BLEAddressType.random, 
-                                 timeout=10,
-                                 auto_reconnect=True)
+                                 address_type=pygatt.BLEAddressType.random)
         Melon.connected = True
 
-    except Exception:
+    except Exception as e:
         Melon.connected = False
-        print("Could not connect to Melon Headband: " + Melon.ADDRESS )#+ " because of error:\n" + str(e))
-        #exit()
+        print("Could not connect to Melon Headband: " + Melon.ADDRESS + " because of error:\n" + str(e))
+        exit()
 
     device.subscribe(Melon.NRFRXCHARUUID,
                      callback=handle_data)

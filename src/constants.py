@@ -1,5 +1,6 @@
 class Melon:
-    ADDRESS: str        = ""                                       #
+    ADDRESS: str        = "e6:4d:9b:8c:d8:53"                      # Remember to change this parameter to your own address
+    
     NRFSERVICEUUID: str = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"   #
     NRFRXCHARUUID: str  = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"   # Set up the UUIDs for the Melon Headband
     NRFTXCHARUUID: str  = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"   #
@@ -12,8 +13,9 @@ class Melon:
     POLLINGRATE: int    = 250                                      # The polling rate is 250Hz
     CHANNELS: [str,str] = ["Fp1", "Fp2"]                           
     SAMPLEMODE: str     = "full"                                   # "full" for 24 bit sample including timestamp, 
-                                                                                # "tiny" for 8 bit sample without timestamp, 
-                                                                                # "raw" is like "tiny" but without applied multiplier
+                                                                   # "tiny" for 8 bit sample without timestamp, 
+                                                                   # "raw" is like "tiny" but without applied multiplier
+    
     BATTERY: int        = 0                                        # Initialize the battery variable
     lastSample: str     = ""
     connected: bool     = False                                    # Initialize the connected variable

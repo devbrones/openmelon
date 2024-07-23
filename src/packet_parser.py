@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-import datetime
-
 def parse(byte_string):
     """
     The function takes a byte string as input, converts it to raw samples, extracts specific values from
