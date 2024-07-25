@@ -1,3 +1,7 @@
 # ignore outputs folder
 src/tests/outputs/*
 
+# ignore eeg data
+eeg_data/*
+test_data/*
+

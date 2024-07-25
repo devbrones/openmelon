@@ -84,17 +84,17 @@ while True:
         raw.filter(0.5, 100)  # Bandpass filter from 0.5 to 100 Hz
 
         # Set up artifact detection for eye movement and blinks. Then add markers to the plot
-        eog_events = mne.preprocessing.find_eog_events(raw)
-        n_blinks = len(eog_events)
-        onsets = eog_events[:, 0] / raw.info['sfreq'] - 0.25
-        durations = np.repeat(0.5, n_blinks)
-        descriptions = ['blink'] * n_blinks
-        blink_annot = mne.Annotations(onsets, durations, descriptions, orig_time=raw.info['meas_date'])
-        raw.set_annotations(blink_annot)
-        axs3.clear() # clear the axes
-        raw.plot(axes=axs3, show=False, events=eog_events, start=0, duration=10, color='white', event_color='red')
-        fig3.canvas.draw()
-        fig3.canvas.flush_events()
+        #eog_events = mne.preprocessing.find_eog_events(raw)
+        #n_blinks = len(eog_events)
+        #onsets = eog_events[:, 0] / raw.info['sfreq'] - 0.25
+        #durations = np.repeat(0.5, n_blinks)
+        #descriptions = ['blink'] * n_blinks
+        #blink_annot = mne.Annotations(onsets, durations, descriptions, orig_time=raw.info['meas_date'])
+        #raw.set_annotations(blink_annot)
+        #axs3.clear() # clear the axes
+        #raw.plot(axes=axs3, show=False, events=eog_events, start=0, duration=10, color='white', event_color='red')
+        #fig3.canvas.draw()
+        #fig3.canvas.flush_events()
 
 
 

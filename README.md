@@ -25,4 +25,6 @@ python melonosc.py -r # retry connection (To be fixed soon™)
 python melonosc.py -h # help
 python melonosc.py -d # debug
 ```
+or use ```melonosc-analyze.py``` to send a focus score to an OSC server
+
 
